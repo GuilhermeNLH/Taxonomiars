@@ -13,19 +13,20 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap}
 header h1{font-size:15px;font-weight:700;color:var(--accent)}
 .pill{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
 .spacer{flex:1}
 .hbtn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:var(--radius);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .hbtn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .hbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.menu-toggle{display:none;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:var(--radius);font-size:18px;cursor:pointer;line-height:1;flex-shrink:0}
 .layout{display:flex;flex:1;overflow:hidden}
-aside{width:295px;min-width:295px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+aside{width:295px;min-width:295px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s ease}
 .aside-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
 .atab{flex:1;padding:9px 4px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:all .15s}
 .atab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(233,69,96,.06)}
-.aside-body{flex:1;overflow-y:auto;padding:12px}
+.aside-body{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
 .aside-body::-webkit-scrollbar{width:3px}
 .aside-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 .field{margin-bottom:10px}
@@ -55,7 +56,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .bc{background:#CC2200;color:#fff}.bm{background:#3a6a8a;color:#fff}.bmi{background:#2a6a3a;color:#fff}.ba{background:#7a6a00;color:#fff}
 .xbtn{background:none;border:none;color:var(--text2);cursor:pointer;font-size:13px;padding:1px 4px;border-radius:3px;line-height:1}
 .xbtn:hover{background:rgba(229,115,115,.15);color:#e57373}
-.canvas-wrap{flex:1;position:relative;overflow:hidden;background:#e8e8e2;cursor:grab}
+.canvas-wrap{flex:1;position:relative;overflow:hidden;background:#e8e8e2;cursor:grab;touch-action:none}
 .canvas-wrap:active{cursor:grabbing}
 #main-svg{display:block;width:100%;height:100%}
 #zoom-info{position:absolute;bottom:10px;left:10px;font-size:10px;color:var(--text2);background:var(--surface);padding:3px 9px;border-radius:20px;border:1px solid var(--border);pointer-events:none}
@@ -71,23 +72,61 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 #toast{position:fixed;bottom:18px;right:18px;background:var(--surface2);color:#fff;padding:9px 16px;border-radius:var(--radius);font-size:12px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;border-left:3px solid var(--accent)}
 #toast.show{opacity:1}
 .tab-panel{display:none}.tab-panel.active{display:block}
+.aside-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
+.aside-overlay.open{display:block}
+
+/* ── Tablet (≤1024px) ── */
+@media(max-width:1024px){
+  aside{width:260px;min-width:260px}
+  .hbtn:not(.primary){padding:5px 9px;font-size:11px}
+}
+
+/* ── Mobile (≤768px) ── */
+@media(max-width:768px){
+  header{padding:8px 10px;gap:6px}
+  header h1{font-size:13px}
+  .pill{display:none}
+  .hbtn{font-size:11px;padding:5px 8px}
+  .hbtn span.btn-label{display:none}
+  .menu-toggle{display:flex;align-items:center;justify-content:center}
+  aside{
+    position:fixed;top:0;left:0;height:100%;z-index:100;
+    transform:translateX(-100%);
+    width:290px;min-width:unset;
+    box-shadow:4px 0 20px rgba(0,0,0,.5);
+  }
+  aside.open{transform:translateX(0)}
+  .ct{width:36px;height:36px;font-size:16px}
+  .ctools{gap:6px}
+  input[type=text],textarea,select{font-size:16px;padding:9px 10px}
+  .btn{padding:11px;font-size:13px}
+  .atab{padding:11px 4px;font-size:12px}
+  .modal{padding:16px;border-radius:10px}
+  .mactions{flex-wrap:wrap}
+  .mactions .btn{min-width:calc(50% - 4px)}
+  #toast{bottom:12px;right:10px;left:10px;text-align:center}
+  .csw{width:26px;height:26px}
+}
 </style>
 </head>
 <body>
 <header>
+  <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Abrir painel">☰</button>
   <h1>🗺 Taxonomy Map Builder</h1>
   <span class="pill">TRM · UFRJ</span>
   <div class="spacer"></div>
-  <button class="hbtn" onclick="exportSVG()">⬇ SVG</button>
-  <button class="hbtn" onclick="exportHTML()">⬇ HTML</button>
-  <button class="hbtn" onclick="exportJSON()">⬇ JSON</button>
-  <button class="hbtn" onclick="document.getElementById('import-file').click()">⬆ Importar</button>
-  <button class="hbtn primary" onclick="document.getElementById('newmap-modal').classList.add('open')">＋ Novo Mapa</button>
+  <button class="hbtn" onclick="exportSVG()">⬇ <span class="btn-label">SVG</span></button>
+  <button class="hbtn" onclick="exportHTML()">⬇ <span class="btn-label">HTML</span></button>
+  <button class="hbtn" onclick="exportJSON()">⬇ <span class="btn-label">JSON</span></button>
+  <button class="hbtn" onclick="document.getElementById('import-file').click()">⬆ <span class="btn-label">Importar</span></button>
+  <button class="hbtn primary" onclick="document.getElementById('newmap-modal').classList.add('open')">＋ <span class="btn-label">Novo Mapa</span></button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
 </header>
 
+<div class="aside-overlay" id="aside-overlay" onclick="closeSidebar()"></div>
+
 <div class="layout">
-<aside>
+<aside id="sidebar">
   <div class="aside-tabs">
     <div class="atab active" onclick="switchTab('add')" id="tab-add">Adicionar</div>
     <div class="atab" onclick="switchTab('nodes')" id="tab-nodes">Nós</div>
@@ -509,6 +548,58 @@ cwrap.addEventListener('wheel', e => {
   applyVP();
 }, {passive:false});
 
+// ── TOUCH EVENTS ─────────────────────────────────
+let touchState = null;
+cwrap.addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    touchState = { type:'pan', x: e.touches[0].clientX, y: e.touches[0].clientY };
+  } else if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    touchState = { type:'pinch', dist, cx, cy };
+  }
+}, {passive:false});
+
+cwrap.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!touchState) return;
+  const rect = cwrap.getBoundingClientRect();
+  if (touchState.type === 'pan' && e.touches.length === 1) {
+    const dx = e.touches[0].clientX - touchState.x;
+    const dy = e.touches[0].clientY - touchState.y;
+    vp.tx += dx; vp.ty += dy;
+    touchState.x = e.touches[0].clientX;
+    touchState.y = e.touches[0].clientY;
+    applyVP();
+  } else if (touchState.type === 'pinch' && e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const newDist = Math.hypot(dx, dy);
+    const f = newDist / touchState.dist;
+    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+    const wx = (cx - vp.tx) / vp.scale, wy = (cy - vp.ty) / vp.scale;
+    vp.scale = Math.min(Math.max(vp.scale * f, 0.12), 8);
+    vp.tx = cx - wx * vp.scale;
+    vp.ty = cy - wy * vp.scale;
+    touchState.dist = newDist;
+    touchState.cx = cx + rect.left;
+    touchState.cy = cy + rect.top;
+    applyVP();
+  }
+}, {passive:false});
+
+cwrap.addEventListener('touchend', e => {
+  if (e.touches.length === 0) touchState = null;
+  else if (e.touches.length === 1) {
+    touchState = { type:'pan', x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+}, {passive:false});
+
 // ═══════════════════════════════
 // HELPERS
 // ═══════════════════════════════
@@ -792,6 +883,19 @@ function toast(msg){
   const el=document.getElementById('toast');
   el.textContent=msg; el.classList.add('show');
   clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ═══════════════════════════════
+// SIDEBAR TOGGLE (mobile)
+// ═══════════════════════════════
+function toggleSidebar(){
+  const sidebar=document.getElementById('sidebar'), overlay=document.getElementById('aside-overlay');
+  const open=sidebar.classList.toggle('open');
+  overlay.classList.toggle('open',open);
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('aside-overlay').classList.remove('open');
 }
 
 // ═══════════════════════════════
