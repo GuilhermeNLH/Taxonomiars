@@ -263,6 +263,7 @@ let editId = null;
 let vp = { tx:0, ty:0, scale:1 };
 let isPan=false, panStart=null;
 let contentW=900, contentH=700;
+let tapStart=null;
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -493,6 +494,27 @@ function render() {
   svg.querySelectorAll('.svgn').forEach(el => {
     el.style.cursor = 'pointer';
     el.addEventListener('click', e => { e.stopPropagation(); openEdit(el.dataset.id); });
+    el.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        const t=e.touches[0];
+        tapStart={x:t.clientX,y:t.clientY,t:Date.now(),id:el.dataset.id};
+      } else {
+        tapStart=null;
+      }
+      e.stopPropagation();
+    }, {passive:true});
+    el.addEventListener('touchend', e => {
+      if (e.changedTouches.length===1 && tapStart && tapStart.id===el.dataset.id) {
+        const t=e.changedTouches[0];
+        const moved=Math.hypot(t.clientX-tapStart.x,t.clientY-tapStart.y)>8 || (Date.now()-tapStart.t)>600;
+        if (!moved) {
+          e.preventDefault();
+          e.stopPropagation();
+          openEdit(el.dataset.id);
+        }
+      }
+      tapStart=null;
+    }, {passive:false});
   });
 }
 
