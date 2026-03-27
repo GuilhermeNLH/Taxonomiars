@@ -45,9 +45,10 @@ const K = {
   // Article column
   ART_GAP: 14,
   ART_X: 0,        // computed
-  ART_W: 310, ART_H: 40, // height expanded para comportar DOI/URL
+  ART_W: 310, ART_H: 40, // height expanded to fit DOI/URL line
 };
 const ART_OFFSETS = { REF:13, JOURNAL:25, DOI:36 };
+const FONT_FAMILY = 'Helvetica';
 
 function initK(){
   K.MESO_X  = K.CX + K.CW + K.ELBOW_GAP;
@@ -144,12 +145,12 @@ function render() {
   els.push(`<rect width="${W}" height="${H}" fill="#f0efe8"/>`);
 
   // ── TITLE / QUERY BAR ────────────────────────────
-  els.push(`<text x="${W/2}" y="26" text-anchor="middle" font-family="Helvetica" font-size="16" font-weight="bold" fill="#CC2200">${esc(title)}</text>`);
+  els.push(`<text x="${W/2}" y="26" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="16" font-weight="bold" fill="#CC2200">${esc(title)}</text>`);
   if (sub)
-    els.push(`<text x="${W/2}" y="44" text-anchor="middle" font-family="Helvetica" font-size="11" fill="#555">${esc(sub)}</text>`);
+    els.push(`<text x="${W/2}" y="44" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="11" fill="#555">${esc(sub)}</text>`);
   if (query) {
     els.push(`<rect x="36" y="52" width="${W-72}" height="22" rx="5" fill="white" stroke="#ccc" stroke-width="0.8"/>`);
-    els.push(`<text x="${W/2}" y="66" text-anchor="middle" font-family="Helvetica" font-size="8.5" fill="#888" font-style="italic">${esc(query)}</text>`);
+    els.push(`<text x="${W/2}" y="66" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="8.5" fill="#888" font-style="italic">${esc(query)}</text>`);
   }
 
   // ── CENTRAL NODE ─────────────────────────────────
@@ -164,10 +165,10 @@ function render() {
     ? (CH - cTextTotalH - 14) / 2 + cLineH
     : (CH - cTextTotalH) / 2 + cLineH);
   cTextLines.forEach((line, i) => {
-    els.push(`<text x="${cx+cw/2}" y="${cTextTopY + i*cLineH}" text-anchor="middle" font-family="Helvetica" font-size="12" font-weight="bold" fill="white">${esc(line)}</text>`);
+    els.push(`<text x="${cx+cw/2}" y="${cTextTopY + i*cLineH}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="12" font-weight="bold" fill="white">${esc(line)}</text>`);
   });
   if (S.central.sub) {
-    els.push(`<text x="${cx+cw/2}" y="${cy+CH-9}" text-anchor="middle" font-family="Helvetica" font-size="9.5" fill="#FFD0CC">${esc(S.central.sub)}</text>`);
+    els.push(`<text x="${cx+cw/2}" y="${cy+CH-9}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="9.5" fill="#FFD0CC">${esc(S.central.sub)}</text>`);
   }
 
   const centralMidY = cy + CH / 2;
@@ -192,10 +193,10 @@ function render() {
     const mTextH = mlines.length * mlH + (meso.desc ? 12 : 0);
     let mty = mesoBoxY + (mh - mTextH) / 2 + mlH;
     mlines.forEach((line, i) => {
-      els.push(`<text x="${mx+mw/2}" y="${mty+i*mlH}" text-anchor="middle" font-family="Helvetica" font-size="11.5" font-weight="bold" fill="${mtextCol}">${esc(line)}</text>`);
+      els.push(`<text x="${mx+mw/2}" y="${mty+i*mlH}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="11.5" font-weight="bold" fill="${mtextCol}">${esc(line)}</text>`);
     });
     if (meso.desc) {
-      els.push(`<text x="${mx+mw/2}" y="${mesoBoxY+mh-7}" text-anchor="middle" font-family="Helvetica" font-size="8" fill="${colorDarken(mtextCol,30)}" font-style="italic">${esc(meso.desc)}</text>`);
+      els.push(`<text x="${mx+mw/2}" y="${mesoBoxY+mh-7}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="8" fill="${colorDarken(mtextCol,30)}" font-style="italic">${esc(meso.desc)}</text>`);
     }
 
     // ── MICROS ──────────────────────────────────────
@@ -212,7 +213,7 @@ function render() {
         const mcTextH = mclines.length * mclH;
         const mcts    = mry + (K.MICRO_H - mcTextH) / 2 + mclH;
         mclines.forEach((line, li) => {
-          els.push(`<text x="${K.MICRO_X+K.MICRO_W/2}" y="${mcts+li*mclH}" text-anchor="middle" font-family="Helvetica" font-size="9.5" fill="#1a4d10">${esc(line)}</text>`);
+          els.push(`<text x="${K.MICRO_X+K.MICRO_W/2}" y="${mcts+li*mclH}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="9.5" fill="#1a4d10">${esc(line)}</text>`);
         });
       });
     }
@@ -224,11 +225,11 @@ function render() {
         const doiUrl = formatDoiUrl(art.doi);
         const doiText = prettyDoi(art.doi);
         els.push(`<rect x="${K.ART_X}" y="${ary}" width="${K.ART_W}" height="${K.ART_H}" rx="5" fill="#FFF3CD" stroke="#C8A400" stroke-width="0.8" class="svgn" data-id="${art.id}"/>`);
-        els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.REF}" text-anchor="middle" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#5c4a00">${esc(art.ref)}</text>`);
+        els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.REF}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="8.5" font-weight="bold" fill="#5c4a00">${esc(art.ref)}</text>`);
         if (art.journal)
-          els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.JOURNAL}" text-anchor="middle" font-family="Helvetica" font-size="8" fill="#7a6a00">${esc(art.journal)}</text>`);
+          els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.JOURNAL}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="8" fill="#7a6a00">${esc(art.journal)}</text>`);
         if (doiUrl)
-          els.push(`<a href="${escAttr(doiUrl)}" target="_blank" rel="noopener noreferrer"><text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.DOI}" text-anchor="middle" font-family="Helvetica" font-size="7.6" fill="#5c4a00" text-decoration="underline">${esc(doiText)}</text></a>`);
+          els.push(`<a href="${escAttr(doiUrl)}" target="_blank" rel="noopener noreferrer"><text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.DOI}" text-anchor="middle" font-family="${FONT_FAMILY}" font-size="7.6" fill="#5c4a00" text-decoration="underline">${esc(doiText)}</text></a>`);
       });
     }
   });
@@ -239,10 +240,10 @@ function render() {
   let lx = 20;
   legend.forEach(([label,col]) => {
     els.push(`<rect x="${lx}" y="${ly}" width="11" height="11" rx="2" fill="${col}" stroke="#999" stroke-width="0.8"/>`);
-    els.push(`<text x="${lx+15}" y="${ly+9}" font-family="Helvetica" font-size="8.5" fill="#666">${esc(label)}</text>`);
+    els.push(`<text x="${lx+15}" y="${ly+9}" font-family="${FONT_FAMILY}" font-size="8.5" fill="#666">${esc(label)}</text>`);
     lx += 96;
   });
-  els.push(`<text x="${W-8}" y="${ly+9}" text-anchor="end" font-family="Helvetica" font-size="8" fill="#bbb">TaxonomyMapBuilder · TRM/UFRJ</text>`);
+  els.push(`<text x="${W-8}" y="${ly+9}" text-anchor="end" font-family="${FONT_FAMILY}" font-size="8" fill="#bbb">TaxonomyMapBuilder · TRM/UFRJ</text>`);
 
   // ── INJECT ───────────────────────────────────────
   svg.setAttribute('width',  W);
@@ -750,6 +751,9 @@ function exportExcel(){
   toast('Planilha exportada');
   rememberAction('export-excel');
 }
+/**
+ * Escapes a value for CSV by wrapping with quotes and doubling internal quotes (RFC 4180).
+ */
 function csvCell(v){ const s=(v??'').toString(); return `"${s.replace(/"/g,'""')}"`; }
 function handleImport(e){
   const f=e.target.files[0]; if(!f) return;

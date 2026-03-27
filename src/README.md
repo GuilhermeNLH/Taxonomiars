@@ -1,1 +1,1 @@
-Use a pasta src para imagens, ícones e outros assets estáticos.
+Use esta pasta para imagens, ícones e outros assets estáticos (static assets go here).
