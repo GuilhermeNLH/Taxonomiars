@@ -24,7 +24,6 @@ const HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
 const HELP_DISPLAY_DELAY = 200; // Brief delay to ensure layout is rendered before auto-opening help
 let helpShownOnce = false;
 let helpTimeoutId = null;
-let helpCleanupRegistered = false;
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -593,6 +592,7 @@ function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('h
 function autoShowHelpOnce(){
   const seen = hasSeenHelp();
   if(seen) return;
+  if(helpTimeoutId){ clearTimeout(helpTimeoutId); helpTimeoutId=null; }
   helpTimeoutId = setTimeout(()=>{
     const helpModal = document.getElementById('help-modal');
     // Recheck in case help was opened manually before the timeout fires
@@ -603,12 +603,6 @@ function autoShowHelpOnce(){
     openHelp();
     helpTimeoutId = null;
   },HELP_DISPLAY_DELAY);
-  if(!helpCleanupRegistered){
-    window.addEventListener('beforeunload', ()=>{
-      if(helpTimeoutId){ clearTimeout(helpTimeoutId); helpTimeoutId=null; }
-    });
-    helpCleanupRegistered = true;
-  }
 }
 
 // ═══════════════════════════════
