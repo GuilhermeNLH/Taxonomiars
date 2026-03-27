@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Taxonomy Map Builder — TRM/UFRJ</title>
+<!-- ♠ STEEL BALL RUN — "This map was made with SPIN." · Go! Go! Zeppeli! -->
 <style>
 :root {
   --bg:#1a1a2e; --surface:#16213e; --surface2:#0f3460;
@@ -74,6 +75,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .tab-panel{display:none}.tab-panel.active{display:block}
 .aside-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99}
 .aside-overlay.open{display:block}
+/* ♠ The Golden Rectangle permeates all things — even this stylesheet */
+.ni[draggable]{user-select:none}
+.ni.dragging{opacity:.35;border-style:dashed!important}
+.ni.drag-over-top{border-top:2px solid var(--accent)!important;margin-top:-1px}
+.ni.drag-over-bot{border-bottom:2px solid var(--accent)!important;margin-bottom:-1px}
+.drag-handle{color:var(--text2);font-size:13px;margin-right:5px;cursor:grab;flex-shrink:0;opacity:.55;line-height:1;padding:0 2px}
+.drag-handle:hover{opacity:1}
 
 /* ── Tablet (≤1024px) ── */
 @media(max-width:1024px){
@@ -115,10 +123,10 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   <h1>🗺 Taxonomy Map Builder</h1>
   <span class="pill">TRM · UFRJ</span>
   <div class="spacer"></div>
-  <button class="hbtn" onclick="exportSVG()">⬇ <span class="btn-label">SVG</span></button>
-  <button class="hbtn" onclick="exportHTML()">⬇ <span class="btn-label">HTML</span></button>
-  <button class="hbtn" onclick="exportJSON()">⬇ <span class="btn-label">JSON</span></button>
-  <button class="hbtn" onclick="document.getElementById('import-file').click()">⬆ <span class="btn-label">Importar</span></button>
+  <button class="hbtn" onclick="exportSVG()" title="Exportar SVG">🖼 <span class="btn-label">SVG</span></button>
+  <button class="hbtn" onclick="exportHTML()" title="Exportar HTML">🌐 <span class="btn-label">HTML</span></button>
+  <button class="hbtn" onclick="exportJSON()" title="Exportar JSON">📦 <span class="btn-label">JSON</span></button>
+  <button class="hbtn" onclick="document.getElementById('import-file').click()" title="Importar JSON">📂 <span class="btn-label">Importar</span></button>
   <button class="hbtn primary" onclick="document.getElementById('newmap-modal').classList.add('open')">＋ <span class="btn-label">Novo Mapa</span></button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
 </header>
@@ -249,6 +257,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 </div>
 
 <div id="toast"></div>
+<!-- D4C: Love Train — "Misfortune is a thing that divides fairly among all mankind." — Funny Valentine -->
+<div id="d4c" aria-hidden="true" style="position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden">Tusk · Act IV · Johnny Joestar · Spin · Steel Ball Run · Wekapipo · Scary Monsters · Diego Brando</div>
 
 <script>
 // ═══════════════════════════════
@@ -264,6 +274,8 @@ let vp = { tx:0, ty:0, scale:1 };
 let isPan=false, panStart=null;
 let contentW=900, contentH=700;
 let tapStart=null;
+let dragSrcId = null;
+let touchDrag = { active:false, id:null, ghost:null, timer:null };
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -271,6 +283,7 @@ function uid(){ return 'n'+(S._id++) }
 // LAYOUT CONSTANTS
 // ═══════════════════════════════
 // All in SVG user units (pixels at 1:1)
+// ♠ These proportions orbit the Golden Rectangle — Gyro's secret of the Spin
 const K = {
   PAD_TOP: 90,    // space for title/query
   PAD_BOT: 36,
@@ -784,13 +797,101 @@ function buildNodeList(){
 function addNI(parent,label,sub,bc,bt,id,canDel,indent){
   const d=document.createElement('div');
   d.className='ni'; d.style.marginLeft=indent+'px';
-  d.innerHTML=`<div><div class="ni-label">${label}</div>${sub?`<div class="ni-sub">${sub}</div>`:''}</div>
-    <div style="display:flex;gap:4px;align-items:center">
-      <span class="badge ${bc}">${bt}</span>
-      ${canDel?`<button class="xbtn" onclick="event.stopPropagation();quickDel('${id}')">✕</button>`:''}
-    </div>`;
+  const isMeso=bc==='bm';
+  if(isMeso){ d.setAttribute('draggable','true'); d.dataset.dragId=id; }
+  d.innerHTML=(isMeso?'<span class="drag-handle" title="Arrastar para reordenar">⠿</span>':'')+
+    `<div style="flex:1;min-width:0"><div class="ni-label">${label}</div>${sub?`<div class="ni-sub">${sub}</div>`:''}</div>`+
+    `<div style="display:flex;gap:4px;align-items:center;flex-shrink:0">`+
+    `<span class="badge ${bc}">${bt}</span>`+
+    `${canDel?`<button class="xbtn" onclick="event.stopPropagation();quickDel('${id}')">✕</button>`:''}`+
+    `</div>`;
   d.onclick=()=>openEdit(id);
+  if(isMeso){
+    d.addEventListener('dragstart',e=>{
+      dragSrcId=id;
+      setTimeout(()=>d.classList.add('dragging'),0);
+      e.dataTransfer.effectAllowed='move';
+    });
+    d.addEventListener('dragend',()=>{ d.classList.remove('dragging'); clearDragOver(); });
+    d.addEventListener('dragover',e=>{
+      e.preventDefault(); e.dataTransfer.dropEffect='move';
+      clearDragOver();
+      const r=d.getBoundingClientRect();
+      d.classList.add(e.clientY<r.top+r.height/2?'drag-over-top':'drag-over-bot');
+    });
+    d.addEventListener('dragleave',()=>clearDragOver());
+    d.addEventListener('drop',e=>{
+      e.preventDefault();
+      performDrop(id,e.clientY);
+    });
+    // Touch drag (long-press to activate)
+    d.addEventListener('touchstart',e=>{
+      if(e.touches.length!==1) return;
+      clearTimeout(touchDrag.timer);
+      resetTouchDrag();
+      const t=e.touches[0];
+      touchDrag.timer=setTimeout(()=>{
+        touchDrag.active=true; touchDrag.id=id;
+        d.classList.add('dragging');
+        const g=d.cloneNode(true);
+        g.style.cssText=`position:fixed;left:${t.clientX-10}px;top:${t.clientY-30}px;width:${d.offsetWidth}px;opacity:.88;pointer-events:none;z-index:9999;border:2px solid var(--accent);border-radius:var(--radius);padding:7px 9px;background:var(--surface2);box-shadow:0 8px 24px rgba(0,0,0,.55)`;
+        document.body.appendChild(g);
+        touchDrag.ghost=g;
+        navigator.vibrate&&navigator.vibrate(40);
+      },450);
+    },{passive:true});
+    d.addEventListener('touchmove',e=>{
+      if(!touchDrag.active||touchDrag.id!==id){ clearTimeout(touchDrag.timer); return; }
+      e.preventDefault();
+      const t=e.touches[0];
+      if(touchDrag.ghost){ touchDrag.ghost.style.left=(t.clientX-10)+'px'; touchDrag.ghost.style.top=(t.clientY-30)+'px'; }
+      clearDragOver();
+      document.querySelectorAll('#node-list .ni[data-drag-id]').forEach(ni=>{
+        const r=ni.getBoundingClientRect();
+        if(t.clientY>=r.top&&t.clientY<=r.bottom) ni.classList.add(t.clientY<r.top+r.height/2?'drag-over-top':'drag-over-bot');
+      });
+    },{passive:false});
+    d.addEventListener('touchend',e=>{
+      clearTimeout(touchDrag.timer);
+      if(!touchDrag.active||touchDrag.id!==id){ touchDrag.active=false; return; }
+      e.preventDefault();
+      const t=e.changedTouches[0];
+      d.classList.remove('dragging');
+      if(touchDrag.ghost){ touchDrag.ghost.remove(); touchDrag.ghost=null; }
+      let tgtId=null,tgtY=null;
+      document.querySelectorAll('#node-list .ni[data-drag-id]').forEach(ni=>{
+        const r=ni.getBoundingClientRect();
+        if(t.clientY>=r.top&&t.clientY<=r.bottom){ tgtId=ni.dataset.dragId; tgtY=t.clientY; }
+      });
+      clearDragOver();
+      if(tgtId&&tgtId!==id) doReorder(id,tgtId,tgtY);
+      resetTouchDrag();
+    },{passive:false});
+  }
   parent.appendChild(d);
+}
+function clearDragOver(){
+  document.querySelectorAll('.drag-over-top,.drag-over-bot').forEach(el=>el.classList.remove('drag-over-top','drag-over-bot'));
+}
+function resetTouchDrag(){ touchDrag={active:false,id:null,ghost:null,timer:null}; }
+function performDrop(dstId,clientY){
+  clearDragOver();
+  if(!dragSrcId||dragSrcId===dstId){dragSrcId=null;return;}
+  doReorder(dragSrcId,dstId,clientY);
+  dragSrcId=null;
+}
+function doReorder(srcId,dstId,clientY){
+  const srcIdx=S.mesos.findIndex(m=>m.id===srcId);
+  const dstIdx=S.mesos.findIndex(m=>m.id===dstId);
+  if(srcIdx<0||dstIdx<0) return;
+  const dstEl=document.querySelector(`.ni[data-drag-id="${dstId}"]`);
+  let ins=true;
+  if(dstEl&&clientY!=null){const r=dstEl.getBoundingClientRect();ins=clientY<r.top+r.height/2;}
+  const[item]=S.mesos.splice(srcIdx,1);
+  const nd=S.mesos.findIndex(m=>m.id===dstId);
+  S.mesos.splice(ins?nd:nd+1,0,item);
+  render();buildNodeList();
+  toast('Ordem atualizada');
 }
 
 // ═══════════════════════════════
@@ -925,6 +1026,11 @@ function closeSidebar(){
 // ═══════════════════════════════
 loadEx('membranas');
 setTimeout(fitAll, 80);
+// ♠ Tusk Act 4 — 7 shots, 7 nails, 7 universes (try clicking the title 7 times)
+let _jC=0;
+document.querySelector('header h1').addEventListener('click',()=>{
+  if(++_jC===7){_jC=0;toast('🌟 TUSK ACT 4 — NAAAAAAAAIL! ♠');}
+});
 </script>
 </body>
 </html>
