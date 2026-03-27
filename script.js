@@ -45,8 +45,9 @@ const K = {
   // Article column
   ART_GAP: 14,
   ART_X: 0,        // computed
-  ART_W: 310, ART_H: 40, // height expanded to fit DOI/URL line
+  ART_W: 310, ART_H: 40, // expanded from 32→40 para acomodar a linha de DOI/URL
 };
+// Offsets Y para texto de referência, periódico e DOI dentro dos artigos
 const ART_OFFSETS = { REF:13, JOURNAL:25, DOI:36 };
 const FONT_FAMILY = 'Helvetica';
 
@@ -390,7 +391,7 @@ cwrap.addEventListener('touchend', e => {
 // HELPERS
 // ═══════════════════════════════
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-// Escapes strings for safe use inside attribute values (includes single quotes).
+// Extends esc() to also escape single quotes for safe use em atributos HTML.
 function escAttr(s){ return esc(s).replace(/'/g,'&#39;'); }
 
 function formatDoiUrl(doi){
@@ -752,9 +753,12 @@ function exportExcel(){
   rememberAction('export-excel');
 }
 /**
- * Escapes a value for CSV by wrapping with quotes and doubling internal quotes (RFC 4180).
+ * Escapes a value for CSV by turning null/undefined into '', wrapping with quotes and doubling internal quotes (RFC 4180).
  */
-function csvCell(v){ const s=(v??'').toString(); return `"${s.replace(/"/g,'""')}"`; }
+function csvCell(v){
+  const s=(v??'').toString();
+  return `"${s.replace(/"/g,'""')}"`;
+}
 function handleImport(e){
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
