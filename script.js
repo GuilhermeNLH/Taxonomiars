@@ -19,8 +19,8 @@ const EASTER_EGG_SEQUENCES = [
   {seq:['export-svg','export-json','export-excel'],msg:'Steel Ball Run — o spin está alinhado.'},
   {seq:['fit','zoom-reset','fit'],msg:'Saint’s Corpse whispers: siga o vento do Oeste.'}
 ];
-const HELP_SEEN_KEY = 'taxonomiars_help_seen';
-const HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
+const TAXONOMY_HELP_SEEN_KEY = 'taxonomiars_help_seen';
+const TAXONOMY_HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
 const HELP_DISPLAY_DELAY = 200; // Brief delay to ensure layout is rendered before auto-opening help
 let helpShownOnce = false;
 let helpTimeoutId = null;
@@ -575,13 +575,13 @@ function safeGetItem(store, key, label){
 }
 function markHelpSeen(){
   helpShownOnce = true;
-  safeSetItem(localStorage, HELP_SEEN_KEY,'1','localStorage');
-  safeSetItem(sessionStorage, HELP_SEEN_SESSION_KEY,'1','sessionStorage');
+  safeSetItem(localStorage, TAXONOMY_HELP_SEEN_KEY,'1','localStorage');
+  safeSetItem(sessionStorage, TAXONOMY_HELP_SEEN_SESSION_KEY,'1','sessionStorage');
 }
 function hasSeenHelp(){
   if(helpShownOnce) return true;
-  if(safeGetItem(localStorage, HELP_SEEN_KEY,'localStorage')) return true;
-  if(safeGetItem(sessionStorage, HELP_SEEN_SESSION_KEY,'sessionStorage')) return true;
+  if(safeGetItem(localStorage, TAXONOMY_HELP_SEEN_KEY,'localStorage')) return true;
+  if(safeGetItem(sessionStorage, TAXONOMY_HELP_SEEN_SESSION_KEY,'sessionStorage')) return true;
   return false;
 }
 function openHelp(){
@@ -592,7 +592,6 @@ function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('h
 function autoShowHelpOnce(){
   const seen = hasSeenHelp();
   if(seen) return;
-  if(helpTimeoutId){ clearTimeout(helpTimeoutId); helpTimeoutId=null; }
   helpTimeoutId = setTimeout(()=>{
     const helpModal = document.getElementById('help-modal');
     // Recheck in case help was opened manually before the timeout fires
