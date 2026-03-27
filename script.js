@@ -45,9 +45,9 @@ const K = {
   // Article column
   ART_GAP: 14,
   ART_X: 0,        // computed
-  ART_W: 310, ART_H: 40, // expanded from 32→40 para acomodar a linha de DOI/URL
+  ART_W: 310, ART_H: 40, // expanded from 32→40 to accommodate the DOI/URL line
 };
-// Offsets Y para texto de referência, periódico e DOI dentro dos artigos
+// Y offsets (px) for reference, journal and DOI lines inside article cards
 const ART_OFFSETS = { REF:13, JOURNAL:25, DOI:36 };
 const FONT_FAMILY = 'Helvetica';
 
@@ -391,7 +391,7 @@ cwrap.addEventListener('touchend', e => {
 // HELPERS
 // ═══════════════════════════════
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-// Extends esc() to also escape single quotes for safe use em atributos HTML.
+// Extends esc() to also escape single quotes for safe use in HTML attributes.
 function escAttr(s){ return esc(s).replace(/'/g,'&#39;'); }
 
 function formatDoiUrl(doi){
@@ -753,7 +753,7 @@ function exportExcel(){
   rememberAction('export-excel');
 }
 /**
- * Escapes a value for CSV by turning null/undefined into '', wrapping with quotes and doubling internal quotes (RFC 4180).
+ * Escapes a value for CSV by turning null/undefined into '', wrapping with quotes, and doubling internal quotes (RFC 4180).
  */
 function csvCell(v){
   const s=(v??'').toString();
@@ -856,7 +856,7 @@ function closeSidebar(){
 loadEx('membranas');
 setTimeout(fitAll, 80);
 // ♠ Tusk Act 4 — 7 shots, 7 nails, 7 universes (try clicking the title 7 times)
-let _jC=0;
+let titleClickCount=0;
 document.querySelector('header h1').addEventListener('click',()=>{
-  if(++_jC===7){_jC=0;toast('Tusk Act 4 — spin completo.');}
+  if(++titleClickCount===7){titleClickCount=0;toast('Tusk Act 4 — full spin achieved.');}
 });
