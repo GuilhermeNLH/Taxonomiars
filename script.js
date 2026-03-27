@@ -21,8 +21,9 @@ const EASTER_EGG_SEQUENCES = [
 ];
 const HELP_SEEN_KEY = 'taxonomiars_help_seen';
 const HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
-const HELP_DISPLAY_DELAY = 200; // breve delay para garantir layout/render antes de abrir a ajuda automaticamente
+const HELP_DISPLAY_DELAY = 200; // Breve delay para garantir layout/render antes de abrir a ajuda automaticamente
 let helpShownOnce = false;
+let helpTimeoutId = null;
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -586,12 +587,14 @@ function openHelp(){
 function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
 function autoShowHelpOnce(){
   if(hasSeenHelp()) return;
-  setTimeout(()=>{
-    const helpModal=document.getElementById('help-modal');
+  helpTimeoutId = setTimeout(()=>{
+    const helpModal = document.getElementById('help-modal');
     if(hasSeenHelp() || (helpModal && helpModal.classList.contains('open'))) return;
     openHelp();
   },HELP_DISPLAY_DELAY);
 }
+
+window.addEventListener('beforeunload', ()=>{ if(helpTimeoutId) clearTimeout(helpTimeoutId); });
 
 // ═══════════════════════════════
 // SELECTS / NODE LIST
