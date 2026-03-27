@@ -21,9 +21,10 @@ const EASTER_EGG_SEQUENCES = [
 ];
 const HELP_SEEN_KEY = 'taxonomiars_help_seen';
 const HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
-const HELP_DISPLAY_DELAY = 200; // Breve delay para garantir layout/render antes de abrir a ajuda automaticamente
+const HELP_DISPLAY_DELAY = 200; // Brief delay to ensure layout/render is ready before auto-opening help
 let helpShownOnce = false;
 let helpTimeoutId = null;
+let helpCleanupRegistered = false;
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -565,19 +566,23 @@ function deleteNode(){
   quickDel(editId); closeModal();
 }
 function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+function safeSetItem(store, key, value, label){
+  try{ store.setItem(key,value); }
+  catch(e){ console.warn(`Help modal: unable to persist flag in ${label}.`, e); }
+}
+function safeGetItem(store, key, label){
+  try{ return store.getItem(key); }
+  catch(e){ console.warn(`Help modal: unable to read flag from ${label}.`, e); return null; }
+}
 function markHelpSeen(){
   helpShownOnce = true;
-  try{ localStorage.setItem(HELP_SEEN_KEY,'1'); }
-  catch(e){ console.warn('Não foi possível registrar que a ajuda foi exibida no localStorage:', e); }
-  try{ sessionStorage.setItem(HELP_SEEN_SESSION_KEY,'1'); }
-  catch(e){ console.warn('Não foi possível registrar que a ajuda foi exibida no sessionStorage:', e); }
+  safeSetItem(localStorage, HELP_SEEN_KEY,'1','localStorage');
+  safeSetItem(sessionStorage, HELP_SEEN_SESSION_KEY,'1','sessionStorage');
 }
 function hasSeenHelp(){
   if(helpShownOnce) return true;
-  try{ if(localStorage.getItem(HELP_SEEN_KEY)) return true; }
-  catch(e){ console.warn('Ajuda automática: localStorage indisponível.', e); }
-  try{ if(sessionStorage.getItem(HELP_SEEN_SESSION_KEY)) return true; }
-  catch(e){ console.warn('Ajuda automática: sessionStorage indisponível.', e); }
+  if(safeGetItem(localStorage, HELP_SEEN_KEY,'localStorage')) return true;
+  if(safeGetItem(sessionStorage, HELP_SEEN_SESSION_KEY,'sessionStorage')) return true;
   return false;
 }
 function openHelp(){
@@ -586,15 +591,18 @@ function openHelp(){
 }
 function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
 function autoShowHelpOnce(){
-  if(hasSeenHelp()) return;
+  const seen = hasSeenHelp();
+  if(seen) return;
   helpTimeoutId = setTimeout(()=>{
     const helpModal = document.getElementById('help-modal');
     if(hasSeenHelp() || (helpModal && helpModal.classList.contains('open'))) return;
     openHelp();
   },HELP_DISPLAY_DELAY);
+  if(!helpCleanupRegistered){
+    window.addEventListener('beforeunload', ()=>{ if(helpTimeoutId) clearTimeout(helpTimeoutId); });
+    helpCleanupRegistered = true;
+  }
 }
-
-window.addEventListener('beforeunload', ()=>{ if(helpTimeoutId) clearTimeout(helpTimeoutId); });
 
 // ═══════════════════════════════
 // SELECTS / NODE LIST
