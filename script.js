@@ -20,6 +20,7 @@ const EASTER_EGG_SEQUENCES = [
   {seq:['fit','zoom-reset','fit'],msg:'Saint’s Corpse whispers: siga o vento do Oeste.'}
 ];
 const HELP_SEEN_KEY = 'taxonomiars_help_seen';
+const HELP_DISPLAY_DELAY = 200;
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -568,9 +569,9 @@ function openHelp(){
 function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
 function autoShowHelpOnce(){
   try{
-    if(localStorage.getItem(HELP_SEEN_KEY)==='1') return;
+    if(localStorage.getItem(HELP_SEEN_KEY)) return;
   }catch{}
-  setTimeout(()=>openHelp(),200);
+  setTimeout(()=>openHelp(),HELP_DISPLAY_DELAY);
 }
 
 // ═══════════════════════════════
