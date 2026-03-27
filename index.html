@@ -83,6 +83,16 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .drag-handle{color:var(--text2);font-size:13px;margin-right:5px;cursor:grab;flex-shrink:0;opacity:.55;line-height:1;padding:0 2px}
 .drag-handle:hover{opacity:1}
 
+/* ── Help Modal ── */
+.help-modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;width:640px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow)}
+.help-modal h2{font-size:15px;font-weight:700;margin-bottom:16px;color:var(--accent)}
+.help-modal h3{font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.7px;margin:16px 0 7px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.help-modal p,.help-modal li{font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:4px}
+.help-modal ul,.help-modal ol{padding-left:18px;margin-bottom:8px}
+.help-modal li{margin-bottom:3px}
+.help-modal strong{color:var(--text)}
+.help-modal .close-btn{margin-top:18px}
+
 /* ── Tablet (≤1024px) ── */
 @media(max-width:1024px){
   aside{width:260px;min-width:260px}
@@ -127,6 +137,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   <button class="hbtn" onclick="exportHTML()" title="Exportar HTML">🌐 <span class="btn-label">HTML</span></button>
   <button class="hbtn" onclick="exportJSON()" title="Exportar JSON">📦 <span class="btn-label">JSON</span></button>
   <button class="hbtn" onclick="document.getElementById('import-file').click()" title="Importar JSON">📂 <span class="btn-label">Importar</span></button>
+  <button class="hbtn" onclick="document.getElementById('help-modal').classList.add('open')" title="Ajuda / Como usar">❓ <span class="btn-label">Ajuda</span></button>
   <button class="hbtn primary" onclick="document.getElementById('newmap-modal').classList.add('open')">＋ <span class="btn-label">Novo Mapa</span></button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
 </header>
@@ -252,6 +263,66 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     <div class="mactions">
       <button class="btn b-cancel" onclick="document.getElementById('newmap-modal').classList.remove('open')">Cancelar</button>
       <button class="btn b-del" onclick="newMap()">🗑 Limpar e Começar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="help-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="help-modal">
+    <h2>❓ Como usar o Taxonomy Map Builder</h2>
+
+    <h3>Primeiros passos</h3>
+    <ol>
+      <li>Abra <strong>index.html</strong> no navegador (ou hospede em qualquer servidor estático).</li>
+      <li>Escolha um modelo em <strong>Configurar → Modelos</strong> (Membranas CO₂, Biogás ou Mapa em Branco).</li>
+      <li>No painel <strong>Adicionar</strong>, preencha os campos e clique em:
+        <ul>
+          <li><strong>Atualizar Central</strong> — define o tema principal do mapa.</li>
+          <li><strong>Adicionar Driver Meso</strong> — cria grupos (com cor, nome, descrição).</li>
+          <li><strong>Adicionar Micro</strong> — cria subitens dentro de um Meso.</li>
+          <li><strong>Adicionar Artigo</strong> — adiciona referências ligadas a um Meso.</li>
+        </ul>
+      </li>
+      <li>Clique ou toque em qualquer nó no mapa para editá-lo; use o painel <strong>Nós</strong> para listar, abrir rapidamente e excluir.</li>
+      <li>Exporte via botões do topo (SVG, HTML, JSON) ou importe um JSON salvo para continuar a edição.</li>
+    </ol>
+
+    <h3>Painel lateral</h3>
+    <ul>
+      <li><strong>Adicionar:</strong> cria o nó central, mesos, micros e artigos.</li>
+      <li><strong>Nós:</strong> lista hierárquica com contadores; clique/toque abre a edição. O "X" remove o nó e seus descendentes.</li>
+      <li><strong>Configurar:</strong> edita Título, Subtítulo e Query; ajusta espaçamento; alterna exibição de artigos; carrega modelos.</li>
+    </ul>
+
+    <h3>Edição de nós</h3>
+    <p>Clique com o mouse <strong>ou toque rápido</strong> sobre qualquer bloco do SVG para abrir o modal de edição. No modal você pode alterar nome, descrição, cor, DOI/URL e driver pai. O botão <strong>Deletar</strong> remove o nó e todos os seus filhos.</p>
+
+    <h3>Navegação e zoom</h3>
+    <ul>
+      <li><strong>Desktop:</strong> arraste com o botão esquerdo para mover; roda do mouse para zoom. Botões flutuantes: <strong>＋/－</strong> (zoom), <strong>⊡</strong> (reset), <strong>⤢</strong> (ajustar ao quadro).</li>
+      <li><strong>Touch:</strong> arraste com um dedo para mover; pinça para zoom. Toque rápido em um nó abre a edição.</li>
+    </ul>
+
+    <h3>Importar e exportar</h3>
+    <ul>
+      <li><strong>Exportar SVG:</strong> baixa a arte vetorial limpa.</li>
+      <li><strong>Exportar HTML:</strong> gera um HTML autossuficiente com o SVG embutido.</li>
+      <li><strong>Exportar JSON:</strong> salva o estado completo do mapa.</li>
+      <li><strong>Importar JSON:</strong> recarrega um arquivo salvo (o mapa atual é substituído).</li>
+    </ul>
+
+    <h3>Novo mapa</h3>
+    <p>O botão <strong>＋ Novo Mapa</strong> abre uma confirmação e reseta o estado para um mapa vazio.</p>
+
+    <h3>Notas rápidas</h3>
+    <ul>
+      <li>O SVG é recalculado a cada alteração; o zoom não muda a geometria, só a visualização.</li>
+      <li>A coluna de artigos pode ser ocultada em <strong>Configurar → Mostrar artigos</strong>.</li>
+      <li>O aplicativo é 100% client-side — basta o arquivo HTML e um navegador moderno.</li>
+    </ul>
+
+    <div class="mactions">
+      <button class="btn b-cancel close-btn" onclick="document.getElementById('help-modal').classList.remove('open')">✕ Fechar</button>
     </div>
   </div>
 </div>
