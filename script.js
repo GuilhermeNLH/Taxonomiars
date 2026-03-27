@@ -20,6 +20,7 @@ const EASTER_EGG_SEQUENCES = [
   {seq:['fit','zoom-reset','fit'],msg:'Saint’s Corpse whispers: siga o vento do Oeste.'}
 ];
 const HELP_SEEN_KEY = 'taxonomiars_help_seen';
+const HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
 const HELP_DISPLAY_DELAY = 200;
 let helpShownOnce = false;
 
@@ -563,25 +564,29 @@ function deleteNode(){
   quickDel(editId); closeModal();
 }
 function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
-function openHelp(){
-  document.getElementById('help-modal').classList.add('open');
+function markHelpSeen(){
   helpShownOnce = true;
   try{ localStorage.setItem(HELP_SEEN_KEY,'1'); }
-  catch(e){ console.warn('Não foi possível registrar que a ajuda foi exibida:', e); }
+  catch(e){ console.warn('Não foi possível registrar que a ajuda foi exibida no localStorage:', e); }
+  try{ sessionStorage.setItem(HELP_SEEN_SESSION_KEY,'1'); }
+  catch(e){ console.warn('Não foi possível registrar que a ajuda foi exibida no sessionStorage:', e); }
+}
+function hasSeenHelp(){
+  if(helpShownOnce) return true;
+  try{ if(localStorage.getItem(HELP_SEEN_KEY)) return true; }
+  catch(e){ console.warn('Ajuda automática: localStorage indisponível.', e); }
+  try{ if(sessionStorage.getItem(HELP_SEEN_SESSION_KEY)) return true; }
+  catch(e){ console.warn('Ajuda automática: sessionStorage indisponível.', e); }
+  return false;
+}
+function openHelp(){
+  document.getElementById('help-modal').classList.add('open');
+  markHelpSeen();
 }
 function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
 function autoShowHelpOnce(){
-  if(helpShownOnce) return;
-  try{
-    if(localStorage.getItem(HELP_SEEN_KEY)) return;
-  }catch(e){
-    console.warn('Ajuda automática: storage indisponível, exibindo mesmo assim.', e);
-    helpShownOnce = true;
-    setTimeout(()=>openHelp(),HELP_DISPLAY_DELAY);
-    return;
-  }
-  helpShownOnce = true;
-  setTimeout(()=>openHelp(),HELP_DISPLAY_DELAY);
+  if(hasSeenHelp()) return;
+  setTimeout(()=>{ if(!hasSeenHelp()) openHelp(); },HELP_DISPLAY_DELAY);
 }
 
 // ═══════════════════════════════
