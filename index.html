@@ -267,13 +267,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   </div>
 </div>
 
-<div class="modal-bg" id="help-modal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal-bg" id="help-modal" onclick="closeHelp(event)">
   <div class="help-modal">
     <h2>❓ Como usar o Taxonomy Map Builder</h2>
 
     <h3>Primeiros passos</h3>
     <ol>
-      <li>Abra <strong>index.html</strong> no navegador (ou hospede em qualquer servidor estático).</li>
+      <li>Acesse o aplicativo em qualquer navegador moderno — não é necessário instalar nada.</li>
       <li>Escolha um modelo em <strong>Configurar → Modelos</strong> (Membranas CO₂, Biogás ou Mapa em Branco).</li>
       <li>No painel <strong>Adicionar</strong>, preencha os campos e clique em:
         <ul>
@@ -842,6 +842,7 @@ function deleteNode(){
   quickDel(editId); closeModal();
 }
 function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
 
 // ═══════════════════════════════
 // SELECTS / NODE LIST
