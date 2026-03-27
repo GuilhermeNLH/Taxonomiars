@@ -45,9 +45,9 @@ const K = {
   // Article column
   ART_GAP: 14,
   ART_X: 0,        // computed
-  ART_W: 310, ART_H: 40, // expanded from 32→40 to accommodate the DOI/URL line
+  ART_W: 310, ART_H: 40, // expanded from 32→40 to accommodate the DOI/URL line (see ART_OFFSETS)
 };
-// Y offsets (px) for reference, journal and DOI lines inside article cards
+// Y offsets (px) for reference, journal and DOI lines inside article cards (must fit within K.ART_H)
 const ART_OFFSETS = { REF:13, JOURNAL:25, DOI:36 };
 const FONT_FAMILY = 'Helvetica';
 
@@ -391,7 +391,7 @@ cwrap.addEventListener('touchend', e => {
 // HELPERS
 // ═══════════════════════════════
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-// Extends esc() to also escape single quotes for safe use in HTML attributes.
+// Extends esc() by also escaping single quotes for safe use in HTML attribute values.
 function escAttr(s){ return esc(s).replace(/'/g,'&#39;'); }
 
 function formatDoiUrl(doi){
@@ -439,7 +439,8 @@ function wrapText(str, maxChars){
 
 function rememberAction(key){
   actionSeq.push(key);
-  if(actionSeq.length>6) actionSeq.shift();
+  const maxLen=Math.max(6,...EASTER_EGG_SEQUENCES.map(s=>s.seq.length));
+  if(actionSeq.length>maxLen) actionSeq.shift();
   EASTER_EGG_SEQUENCES.forEach(({seq,msg})=>{
     if(endsWithSeq(actionSeq,seq)){ toast(msg); }
   });
