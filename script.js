@@ -21,7 +21,7 @@ const EASTER_EGG_SEQUENCES = [
 ];
 const HELP_SEEN_KEY = 'taxonomiars_help_seen';
 const HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
-const HELP_DISPLAY_DELAY = 200; // Brief delay to ensure layout/render is ready before auto-opening help
+const HELP_DISPLAY_DELAY = 200; // Brief delay to ensure layout is rendered before auto-opening help
 let helpShownOnce = false;
 let helpTimeoutId = null;
 let helpCleanupRegistered = false;
@@ -595,11 +595,18 @@ function autoShowHelpOnce(){
   if(seen) return;
   helpTimeoutId = setTimeout(()=>{
     const helpModal = document.getElementById('help-modal');
-    if(hasSeenHelp() || (helpModal && helpModal.classList.contains('open'))) return;
+    // Recheck in case help was opened manually before the timeout fires
+    if(hasSeenHelp() || (helpModal && helpModal.classList.contains('open'))){
+      helpTimeoutId = null;
+      return;
+    }
     openHelp();
+    helpTimeoutId = null;
   },HELP_DISPLAY_DELAY);
   if(!helpCleanupRegistered){
-    window.addEventListener('beforeunload', ()=>{ if(helpTimeoutId) clearTimeout(helpTimeoutId); });
+    window.addEventListener('beforeunload', ()=>{
+      if(helpTimeoutId){ clearTimeout(helpTimeoutId); helpTimeoutId=null; }
+    });
     helpCleanupRegistered = true;
   }
 }
