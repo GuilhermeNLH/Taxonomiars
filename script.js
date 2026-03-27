@@ -19,6 +19,7 @@ const EASTER_EGG_SEQUENCES = [
   {seq:['export-svg','export-json','export-excel'],msg:'Steel Ball Run — o spin está alinhado.'},
   {seq:['fit','zoom-reset','fit'],msg:'Saint’s Corpse whispers: siga o vento do Oeste.'}
 ];
+const HELP_SEEN_KEY = 'taxonomiars_help_seen';
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -560,7 +561,17 @@ function deleteNode(){
   quickDel(editId); closeModal();
 }
 function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+function openHelp(){
+  document.getElementById('help-modal').classList.add('open');
+  try{ localStorage.setItem(HELP_SEEN_KEY,'1'); }catch{}
+}
 function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
+function autoShowHelpOnce(){
+  try{
+    if(localStorage.getItem(HELP_SEEN_KEY)==='1') return;
+  }catch{}
+  setTimeout(()=>openHelp(),200);
+}
 
 // ═══════════════════════════════
 // SELECTS / NODE LIST
@@ -856,6 +867,7 @@ function closeSidebar(){
 // ═══════════════════════════════
 loadEx('membranas');
 setTimeout(fitAll, 80);
+autoShowHelpOnce();
 // ♠ Tusk Act 4 — 7 shots, 7 nails, 7 universes (try clicking the title 7 times)
 let titleClickCount=0;
 document.querySelector('header h1').addEventListener('click',()=>{

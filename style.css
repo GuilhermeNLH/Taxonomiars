@@ -14,6 +14,7 @@ header h1{font-size:15px;font-weight:700;color:var(--accent)}
 .hbtn{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:var(--radius);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
 .hbtn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
 .hbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn-icon{display:none;font-size:14px;line-height:1}
 .menu-toggle{display:none;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:var(--radius);font-size:18px;cursor:pointer;line-height:1;flex-shrink:0}
 .layout{display:flex;flex:1;overflow:hidden}
 aside{width:295px;min-width:295px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s ease}
@@ -98,7 +99,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   header h1{font-size:13px}
   .pill{display:none}
   .hbtn{font-size:11px;padding:5px 8px}
-  .hbtn span.btn-label{display:none}
+  .hbtn.icon-mobile .btn-label{display:none}
+  .hbtn.icon-mobile .btn-icon{display:inline-flex}
   .menu-toggle{display:flex;align-items:center;justify-content:center}
   aside{
     position:fixed;top:0;left:0;height:100%;z-index:100;
