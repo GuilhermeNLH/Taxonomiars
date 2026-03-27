@@ -19,6 +19,12 @@ const EASTER_EGG_SEQUENCES = [
   {seq:['export-svg','export-json','export-excel'],msg:'Steel Ball Run — o spin está alinhado.'},
   {seq:['fit','zoom-reset','fit'],msg:'Saint’s Corpse whispers: siga o vento do Oeste.'}
 ];
+const TAXONOMY_HELP_SEEN_KEY = 'taxonomiars_help_seen';
+const TAXONOMY_HELP_SEEN_SESSION_KEY = 'taxonomiars_help_seen_session';
+const HELP_AUTO_OPEN_DELAY_MS = 200; // Brief delay (validated on slower mid-range mobile renders; tune if needed) to ensure layout is ready before auto-opening help
+let helpShownOnce = false;
+let helpTimeoutId = null;
+window.addEventListener('pagehide', ()=>{ if(helpTimeoutId){ clearTimeout(helpTimeoutId); helpTimeoutId=null; } });
 
 function uid(){ return 'n'+(S._id++) }
 
@@ -560,7 +566,46 @@ function deleteNode(){
   quickDel(editId); closeModal();
 }
 function closeModal(){ document.getElementById('edit-modal').classList.remove('open'); }
+function safeSetItem(store, key, value, label){
+  try{ store.setItem(key,value); }
+  catch(e){ console.warn(`Help modal: unable to persist flag in ${label}.`, e); }
+}
+function safeGetItem(store, key, label){
+  try{ return store.getItem(key); }
+  catch(e){ console.warn(`Help modal: unable to read flag from ${label}.`, e); return null; }
+}
+function markHelpSeen(){
+  helpShownOnce = true;
+  safeSetItem(localStorage, TAXONOMY_HELP_SEEN_KEY,'1','localStorage');
+  safeSetItem(sessionStorage, TAXONOMY_HELP_SEEN_SESSION_KEY,'1','sessionStorage');
+}
+function hasSeenHelp(){
+  if(helpShownOnce) return true;
+  if(safeGetItem(localStorage, TAXONOMY_HELP_SEEN_KEY,'localStorage')) return true;
+  if(safeGetItem(sessionStorage, TAXONOMY_HELP_SEEN_SESSION_KEY,'sessionStorage')) return true;
+  return false;
+}
+function openHelp(){
+  if(helpTimeoutId){ clearTimeout(helpTimeoutId); helpTimeoutId=null; }
+  document.getElementById('help-modal').classList.add('open');
+  markHelpSeen();
+}
 function closeHelp(e){ if(e.target===e.currentTarget) document.getElementById('help-modal').classList.remove('open'); }
+function autoShowHelpOnce(){
+  const seen = hasSeenHelp();
+  if(seen) return;
+  helpTimeoutId = setTimeout(()=>{
+    const helpModal = document.getElementById('help-modal');
+    // Recheck in case help was opened manually before the timeout fires
+    if(hasSeenHelp() || (helpModal && helpModal.classList.contains('open'))){
+      helpTimeoutId = null;
+      return;
+    }
+    if(!helpModal){ helpTimeoutId = null; return; }
+    openHelp();
+    helpTimeoutId = null;
+  },HELP_AUTO_OPEN_DELAY_MS);
+}
 
 // ═══════════════════════════════
 // SELECTS / NODE LIST
@@ -856,6 +901,7 @@ function closeSidebar(){
 // ═══════════════════════════════
 loadEx('membranas');
 setTimeout(fitAll, 80);
+autoShowHelpOnce();
 // ♠ Tusk Act 4 — 7 shots, 7 nails, 7 universes (try clicking the title 7 times)
 let titleClickCount=0;
 document.querySelector('header h1').addEventListener('click',()=>{
