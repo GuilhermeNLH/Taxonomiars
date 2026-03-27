@@ -15,7 +15,7 @@ let tapStart=null;
 let dragSrcId = null;
 let touchDrag = { active:false, id:null, ghost:null, timer:null };
 const actionSeq = [];
-const EGG_SEQS = [
+const EASTER_EGG_SEQUENCES = [
   {seq:['export-svg','export-json','export-excel'],msg:'Steel Ball Run — o spin está alinhado.'},
   {seq:['fit','zoom-reset','fit'],msg:'Saint’s Corpse whispers: siga o vento do Oeste.'}
 ];
@@ -45,8 +45,9 @@ const K = {
   // Article column
   ART_GAP: 14,
   ART_X: 0,        // computed
-  ART_W: 310, ART_H: 40,
+  ART_W: 310, ART_H: 40, // height expanded para comportar DOI/URL
 };
+const ART_OFFSETS = { REF:13, JOURNAL:25, DOI:36 };
 
 function initK(){
   K.MESO_X  = K.CX + K.CW + K.ELBOW_GAP;
@@ -223,11 +224,11 @@ function render() {
         const doiUrl = formatDoiUrl(art.doi);
         const doiText = prettyDoi(art.doi);
         els.push(`<rect x="${K.ART_X}" y="${ary}" width="${K.ART_W}" height="${K.ART_H}" rx="5" fill="#FFF3CD" stroke="#C8A400" stroke-width="0.8" class="svgn" data-id="${art.id}"/>`);
-        els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+13}" text-anchor="middle" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#5c4a00">${esc(art.ref)}</text>`);
+        els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.REF}" text-anchor="middle" font-family="Helvetica" font-size="8.5" font-weight="bold" fill="#5c4a00">${esc(art.ref)}</text>`);
         if (art.journal)
-          els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+25}" text-anchor="middle" font-family="Helvetica" font-size="8" fill="#7a6a00">${esc(art.journal)}</text>`);
+          els.push(`<text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.JOURNAL}" text-anchor="middle" font-family="Helvetica" font-size="8" fill="#7a6a00">${esc(art.journal)}</text>`);
         if (doiUrl)
-          els.push(`<a href="${escAttr(doiUrl)}" target="_blank" rel="noopener noreferrer"><text x="${K.ART_X+K.ART_W/2}" y="${ary+36}" text-anchor="middle" font-family="Helvetica" font-size="7.6" fill="#5c4a00" text-decoration="underline">${esc(doiText)}</text></a>`);
+          els.push(`<a href="${escAttr(doiUrl)}" target="_blank" rel="noopener noreferrer"><text x="${K.ART_X+K.ART_W/2}" y="${ary+ART_OFFSETS.DOI}" text-anchor="middle" font-family="Helvetica" font-size="7.6" fill="#5c4a00" text-decoration="underline">${esc(doiText)}</text></a>`);
       });
     }
   });
@@ -294,6 +295,7 @@ function applyVP(){
 function doZoom(f){
   vp.scale = Math.min(Math.max(vp.scale*f, 0.12), 8);
   applyVP();
+  rememberAction(f>1?'zoom-in':'zoom-out');
 }
 function resetView(){ vp={tx:0,ty:0,scale:1}; applyVP(); rememberAction('zoom-reset'); }
 function fitAll(){
@@ -387,6 +389,7 @@ cwrap.addEventListener('touchend', e => {
 // HELPERS
 // ═══════════════════════════════
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+// Escapes strings for safe use inside attribute values (includes single quotes).
 function escAttr(s){ return esc(s).replace(/'/g,'&#39;'); }
 
 function formatDoiUrl(doi){
@@ -399,6 +402,13 @@ function formatDoiUrl(doi){
 function prettyDoi(doi){
   const u=formatDoiUrl(doi);
   return u ? u.replace(/^https?:\/\/(www\.)?/i,'') : '';
+}
+function buildArticleSubtitle(journal, doi){
+  const parts=[];
+  if(journal) parts.push(journal);
+  const pd=prettyDoi(doi);
+  if(pd) parts.push(pd);
+  return parts.join(' · ');
 }
 
 function colorDarken(hex, amt){
@@ -428,7 +438,7 @@ function wrapText(str, maxChars){
 function rememberAction(key){
   actionSeq.push(key);
   if(actionSeq.length>6) actionSeq.shift();
-  EGG_SEQS.forEach(({seq,msg})=>{
+  EASTER_EGG_SEQUENCES.forEach(({seq,msg})=>{
     if(endsWithSeq(actionSeq,seq)){ toast(msg); }
   });
 }
@@ -570,7 +580,7 @@ function buildNodeList(){
     S.micros.filter(x=>x.parent===m.id).forEach(mc=>addNI(list,mc.name,'','bmi','Micro',mc.id,true,14,null));
     S.articles.filter(x=>x.parent===m.id).forEach(a=>{
       const link=formatDoiUrl(a.doi);
-      const subtitle=[a.journal||'', link?prettyDoi(a.doi):''].filter(Boolean).join(' · ');
+      const subtitle=buildArticleSubtitle(a.journal, a.doi);
       addNI(list,a.ref,subtitle,'ba','Art.',a.id,true,14,link);
     });
   });
